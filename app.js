@@ -57,6 +57,8 @@ async function fetchJson(url){
 }
 
 /* ----------------------- ROLE PROFILE ------------------------------------ */
+/* ----------------------- ROLE PROFILE (idempotent) ----------------------- */
+
 // Fallback role content if /data/competencies.html is missing
 const ROLE_FALLBACK_HTML = `
 <section>
@@ -172,32 +174,46 @@ const ROLE_FALLBACK_HTML = `
 </section>
 `;
 
-function enhanceRoleProfile(){
-  const container = document.getElementById("roleProfile");
-  if (!container) return;
+/** enhanceRoleProfile makes decoration ONCE, preserving original titles */
+function enhanceRoleProfile(container){
+  // Skip if this container already enhanced
+  if (container.dataset.enhanced === "1") return;
 
-  // embellish details blocks
   const icons = ["ℹ️","🧭","🧩","🧱","🌟","📈","🪜"];
   const titles = [];
+
   container.querySelectorAll("details").forEach((d, idx) => {
+    // Skip this details if already enhanced
+    if (d.dataset.enhanced === "1") return;
+
     const summary = d.querySelector("summary");
     if(!summary) return;
-    const titleText = summary.textContent.trim();
-    titles.push(titleText);
 
-    const id = "sec-" + titleText.toLowerCase().replace(/[^a-z0-9]+/g,"-");
+    // Preserve original title once in data-title
+    const originalTitle = d.dataset.title || summary.textContent.trim();
+    d.dataset.title = originalTitle;
+    titles.push(originalTitle);
+
+    // Assign a stable id for TOC
+    const id = "sec-" + originalTitle.toLowerCase().replace(/[^a-z0-9]+/g,"-");
     d.id = id;
 
+    // Build decorated summary content
     const tag = (idx===0 ? "Overview" :
-                 /core competencies/i.test(titleText) ? "Core" :
-                 /professional/i.test(titleText) ? "Professional" :
-                 /kpi/i.test(titleText) ? "KPIs" :
-                 /progression/i.test(titleText) ? "Pathway" : "Section");
-
+                /core competencies/i.test(originalTitle) ? "Core" :
+                /professional/i.test(originalTitle) ? "Professional" :
+                /kpi/i.test(originalTitle) ? "KPIs" :
+                /progression/i.test(originalTitle) ? "Pathway" : "Section");
     const icon = icons[idx % icons.length];
-    summary.innerHTML = `<span>${icon}</span><span>${titleText}</span><span class="tag">${tag}</span><span class="chev">›</span>`;
 
-    // wrap non-summary children for styling/animation if not present
+    summary.innerHTML = `
+      <span>${icon}</span>
+      <span>${originalTitle}</span>
+      <span class="tag">${tag}</span>
+      <span class="chev">›</span>
+    `;
+
+    // Wrap non-summary nodes in .inner (only once)
     if (!d.querySelector(".inner")) {
       const rest = Array.from(d.childNodes).filter(n => n.nodeName.toLowerCase() !== "summary");
       const wrap = document.createElement("div");
@@ -205,46 +221,64 @@ function enhanceRoleProfile(){
       rest.forEach(n => wrap.appendChild(n));
       d.appendChild(wrap);
     }
+
+    d.dataset.enhanced = "1";
   });
 
-  // build TOC
+  // Build the TOC once
   const toc = document.getElementById("tocLinks");
-  if (toc) {
+  if (toc && !toc.dataset.enhanced) {
     toc.innerHTML = titles.map(t => {
       const id = "sec-" + t.toLowerCase().replace(/[^a-z0-9]+/g,"-");
       return `<a href="#${id}">${t}</a>`;
     }).join("");
+    toc.dataset.enhanced = "1";
   }
 
-  // scrollspy
-  const tocLinks = toc ? toc.querySelectorAll("a") : [];
-  const observer = new IntersectionObserver((entries) => {
-    entries.forEach(entry => {
-      const id = entry.target.id;
-      const link = Array.from(tocLinks).find(a => a.getAttribute("href") === `#${id}`);
-      if (link) link.classList.toggle("active", entry.isIntersecting && entry.intersectionRatio > 0.2);
-    });
-  }, { rootMargin: "-20% 0px -70% 0px", threshold: [0, 0.25, 1] });
-  container.querySelectorAll("details").forEach(sec => observer.observe(sec));
+  // Scrollspy (create once)
+  if (!container.dataset.spy) {
+    const tocLinks = toc ? toc.querySelectorAll("a") : [];
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        const id = entry.target.id;
+        const link = Array.from(tocLinks).find(a => a.getAttribute("href") === `#${id}`);
+        if (link) link.classList.toggle("active", entry.isIntersecting && entry.intersectionRatio > 0.2);
+      });
+    }, { rootMargin: "-20% 0px -70% 0px", threshold: [0, 0.25, 1] });
 
-  // expand/collapse all
-  const expandAll = document.getElementById("expandAll");
-  const collapseAll = document.getElementById("collapseAll");
-  if (expandAll) expandAll.onclick = () => container.querySelectorAll("details").forEach(d => d.open = true);
-  if (collapseAll) collapseAll.onclick = () => container.querySelectorAll("details").forEach(d => d.open = false);
+    container.querySelectorAll("details").forEach(sec => observer.observe(sec));
+    container.dataset.spy = "1";
+  }
+
+  // Expand/Collapse handlers (bind once)
+  if (!container.dataset.bound) {
+    const expandAll = document.getElementById("expandAll");
+    const collapseAll = document.getElementById("collapseAll");
+    if (expandAll) expandAll.onclick = () => container.querySelectorAll("details").forEach(d => d.open = true);
+    if (collapseAll) collapseAll.onclick = () => container.querySelectorAll("details").forEach(d => d.open = false);
+    container.dataset.bound = "1";
+  }
+
+  container.dataset.enhanced = "1";
 }
 
 async function onRoleReady(){
   const target = document.getElementById("roleProfile");
   if (!target) return;
-  // Only fetch/inject once per load
+
+  // Inject source HTML exactly once
   if (!target.dataset.loaded) {
-    const html = await fetchText("data/competencies.html");
+    const html = await fetch("data/competencies.html", {cache:"no-cache"})
+      .then(r => r.ok ? r.text() : null)
+      .catch(() => null);
     target.innerHTML = html || ROLE_FALLBACK_HTML;
     target.dataset.loaded = "1";
   }
-  enhanceRoleProfile();
+
+  // Decorate once (safe to call multiple times)
+  enhanceRoleProfile(target);
 }
+
 
 /* ----------------------- PEP FFF PREP ------------------------------------ */
 const PEP_QUESTIONS = [
