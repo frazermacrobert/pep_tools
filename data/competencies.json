@@ -1,1 +1,8 @@
-[]
+[
+  {"theme":"Project Delivery","competency":"End-to-End Ownership","description":"Delivers projects from brief to completion with quality and clarity."},
+  {"theme":"Project Delivery","competency":"Time & Budget Management","description":"Scopes and tracks budgets, timelines, and hours accurately."},
+  {"theme":"Client Communication","competency":"Confidence & Clarity","description":"Provides reliable, professional updates; builds trust."},
+  {"theme":"Team Collaboration","competency":"Connector & Co-ordinator","description":"Coordinates internal teams and freelancers for smooth delivery."},
+  {"theme":"Quality Control","competency":"Attention to Detail","description":"Oversees QA so outputs meet standards."},
+  {"theme":"Tool Usage","competency":"Structured Delivery","description":"Uses PM tools and documentation to maintain rigour."}
+]
