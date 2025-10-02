@@ -30,6 +30,99 @@ fetch("data/competencies.html").then(r=>r.text()).then(html => {
   document.getElementById("roleProfile").innerHTML = html;
 });
 
+// --- ROLE PROFILE ENHANCEMENTS ---------------------------------------------
+function enhanceRoleProfile(){
+  const container = document.getElementById("roleProfile");
+  if (!container) return;
+
+  // 1) Convert details blocks to have icons/tags/chevrons + anchor ids
+  const icons = ["ℹ️","🧭","🧩","🧱","🌟","📈","🪜"];
+  const titles = [];
+  container.querySelectorAll("details").forEach((d, idx) => {
+    const summary = d.querySelector("summary");
+    if(!summary) return;
+    const titleText = summary.textContent.trim();
+    titles.push(titleText);
+
+    // Assign an id for in-page nav
+    const id = "sec-" + titleText.toLowerCase().replace(/[^a-z0-9]+/g,"-");
+    d.id = id;
+
+    // Wrap the summary content with icon + tag + chevron
+    const icon = icons[idx % icons.length];
+    const tag = (idx===0 ? "Overview" :
+                 /core competencies/i.test(titleText) ? "Core" :
+                 /professional/i.test(titleText) ? "Professional" :
+                 /kpi/i.test(titleText) ? "KPIs" :
+                 /progression/i.test(titleText) ? "Pathway" : "Section");
+
+    summary.innerHTML = `
+      <span>${icon}</span>
+      <span>${titleText}</span>
+      <span class="tag">${tag}</span>
+      <span class="chev">›</span>
+    `;
+
+    // Add an inner wrapper so we can animate
+    if (!d.querySelector(".inner")) {
+      const rest = Array.from(d.childNodes).filter(n => n.nodeName.toLowerCase() !== "summary");
+      const wrap = document.createElement("div");
+      wrap.className = "inner";
+      rest.forEach(n => wrap.appendChild(n));
+      d.appendChild(wrap);
+    }
+  });
+
+  // 2) Build the sticky TOC
+  const toc = document.getElementById("tocLinks");
+  if (toc) {
+    toc.innerHTML = titles.map(t => {
+      const id = "sec-" + t.toLowerCase().replace(/[^a-z0-9]+/g,"-");
+      return `<a href="#${id}">${t}</a>`;
+    }).join("");
+  }
+
+  // 3) Scrollspy highlight
+  const tocLinks = toc ? toc.querySelectorAll("a") : [];
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      const id = entry.target.id;
+      const link = Array.from(tocLinks).find(a => a.getAttribute("href") === `#${id}`);
+      if (link) link.classList.toggle("active", entry.isIntersecting && entry.intersectionRatio > 0.2);
+    });
+  }, { rootMargin: "-20% 0px -70% 0px", threshold: [0, 0.25, 1] });
+
+  container.querySelectorAll("details").forEach(sec => observer.observe(sec));
+
+  // 4) Expand/Collapse all
+  const expandAll = document.getElementById("expandAll");
+  const collapseAll = document.getElementById("collapseAll");
+  if (expandAll) expandAll.onclick = () => container.querySelectorAll("details").forEach(d => d.open = true);
+  if (collapseAll) collapseAll.onclick = () => container.querySelectorAll("details").forEach(d => d.open = false);
+
+  // 5) Remember open state (session)
+  const KEY = "sa-role-open";
+  const saved = JSON.parse(sessionStorage.getItem(KEY) || "{}");
+  container.querySelectorAll("details").forEach(d => { if (saved[d.id]) d.open = true; });
+  container.addEventListener("toggle", (e) => {
+    if (e.target.tagName.toLowerCase() !== "details") return;
+    saved[e.target.id] = e.target.open;
+    sessionStorage.setItem(KEY, JSON.stringify(saved));
+  }, true);
+}
+
+// Re-run enhancements each time the role page is shown
+function onRoleReady(){
+  const roleProfile = document.getElementById("roleProfile");
+  if (!roleProfile) return;
+  // If content is already injected, enhance now; else enhance after fetch completes.
+  if (roleProfile.children.length) enhanceRoleProfile();
+  const mo = new MutationObserver(() => { enhanceRoleProfile(); mo.disconnect(); });
+  mo.observe(roleProfile, {childList:true, subtree:false});
+}
+document.addEventListener("DOMContentLoaded", onRoleReady);
+
+
 // --- PEP FFF PREP -----------------------------------------------------------
 const PEP_QUESTIONS = [
   "Looking back, what skills or strengths have you developed most this year, and how have they helped you in your role?",
