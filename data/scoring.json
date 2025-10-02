@@ -1,1 +1,7 @@
-[]
+[
+  {"score":1,"label":"Needs development","desc":"Significant support required; outcomes often below expectations."},
+  {"score":2,"label":"Developing","desc":"Inconsistent performance; meets expectations with guidance."},
+  {"score":3,"label":"Solid","desc":"Consistently meets expectations for the role."},
+  {"score":4,"label":"Strong","desc":"Often exceeds expectations; shows initiative and impact."},
+  {"score":5,"label":"Outstanding","desc":"Regularly exceeds expectations with significant, sustained impact."}
+]
