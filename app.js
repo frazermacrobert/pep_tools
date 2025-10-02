@@ -3,7 +3,58 @@
    Full app.js – routing, role profile, PEP Prep, evaluate (sliders + radar)
    ========================================================================== */
 
-/* ----------------------- SPA ROUTING + THEME ----------------------------- */
+/* ====================== THEME (robust + independent) ====================== */
+(function initTheme(){
+  const BTN_ID = "toggleTheme";
+
+  function apply(mode){
+    document.body.classList.toggle("dark", mode === "dark");
+    localStorage.setItem("sa-theme", mode);
+  }
+
+  // Initial: saved → system → light
+  const saved = localStorage.getItem("sa-theme");
+  const systemDark = window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches;
+  apply(saved || (systemDark ? "dark" : "light"));
+
+  // Bind button click (bind now; re-bind after DOM ready if needed)
+  function bindBtn(){
+    const btn = document.getElementById(BTN_ID);
+    if (!btn) return false;
+    if (!btn.dataset.bound){
+      btn.addEventListener("click", () => {
+        const mode = document.body.classList.contains("dark") ? "light" : "dark";
+        apply(mode);
+      });
+      btn.dataset.bound = "1";
+    }
+    return true;
+  }
+  if (!bindBtn()){
+    document.addEventListener("DOMContentLoaded", bindBtn, { once:true });
+  }
+
+  // Re-apply on tab focus (helps with SPA navigation & system theme changes)
+  document.addEventListener("visibilitychange", () => {
+    if (document.visibilityState === "visible") {
+      const pref = localStorage.getItem("sa-theme") ||
+        (window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");
+      apply(pref);
+      bindBtn(); // ensure bound if DOM changed
+    }
+  });
+
+  // React to OS theme changes live (optional but nice)
+  if (window.matchMedia){
+    const mq = window.matchMedia("(prefers-color-scheme: dark)");
+    mq.addEventListener?.("change", () => {
+      const savedPref = localStorage.getItem("sa-theme");
+      if (!savedPref) apply(mq.matches ? "dark" : "light"); // only if user hasn't chosen
+    });
+  }
+})();
+
+/* ----------------------- SPA ROUTING (no theme here) ---------------------- */
 (function initShell(){
   const sections = ["home","role","pep","evaluate"];
 
@@ -27,17 +78,6 @@
     if (sections.includes(route)) setRoute(route);
   });
   setRoute((location.hash || "#home").slice(1));
-
-  // theme
-  const toggleThemeBtn = document.getElementById("toggleTheme");
-  const themePref = localStorage.getItem("sa-theme");
-  if(themePref==="dark"){ document.body.classList.add("dark"); }
-  if (toggleThemeBtn){
-    toggleThemeBtn.addEventListener("click", () => {
-      document.body.classList.toggle("dark");
-      localStorage.setItem("sa-theme", document.body.classList.contains("dark") ? "dark" : "light");
-    });
-  }
 })();
 
 /* ----------------------- UTIL: safe fetch helpers ------------------------ */
@@ -56,7 +96,6 @@ async function fetchJson(url){
   }catch(e){ return null; }
 }
 
-/* ----------------------- ROLE PROFILE ------------------------------------ */
 /* ----------------------- ROLE PROFILE (stable, single-run) ---------------- */
 
 // 1) Fallback role content (used only if /data/competencies.html not found)
@@ -234,40 +273,40 @@ function enhanceRoleProfile(container){
   });
 
   // Build TOC exactly once
-const toc = document.getElementById("tocLinks");
-if (toc && !toc.dataset.enhanced) {
-  // Build links
-  toc.innerHTML = titles.map(t => {
-    const id = "sec-" + t.toLowerCase().replace(/[^a-z0-9]+/g,"-");
-    return `<a href="#${id}">${t}</a>`;
-  }).join("");
-  toc.dataset.enhanced = "1";
-}
+  const toc = document.getElementById("tocLinks");
+  if (toc && !toc.dataset.enhanced) {
+    // Build links
+    toc.innerHTML = titles.map(t => {
+      const id = "sec-" + t.toLowerCase().replace(/[^a-z0-9]+/g,"-");
+      return `<a href="#${id}">${t}</a>`;
+    }).join("");
+    toc.dataset.enhanced = "1";
+  }
 
-   // Add click handler once: open closed section, then smooth scroll
-if (toc && !toc.dataset.handlers) {
-  toc.addEventListener("click", (e) => {
-    const a = e.target.closest("a");
-    if (!a) return;
-    e.preventDefault();
+  // Add click handler once: open closed section, then smooth scroll
+  if (toc && !toc.dataset.handlers) {
+    toc.addEventListener("click", (e) => {
+      const a = e.target.closest("a");
+      if (!a) return;
+      e.preventDefault();
 
-    const id = a.getAttribute("href").slice(1);
-    const sec = document.getElementById(id);
-    if (!sec) return;
+      const id = a.getAttribute("href").slice(1);
+      const sec = document.getElementById(id);
+      if (!sec) return;
 
-    // If it's a <details> and closed, open it first
-    if (sec.tagName.toLowerCase() === "details" && !sec.open) {
-      sec.open = true;
-    }
+      // If it's a <details> and closed, open it first
+      if (sec.tagName.toLowerCase() === "details" && !sec.open) {
+        sec.open = true;
+      }
 
-    // Smooth scroll with an extra offset for comfort
-    const HEADER_OFFSET = 80;
-    const y = sec.getBoundingClientRect().top + window.scrollY - HEADER_OFFSET;
-    window.scrollTo({ top: y, behavior: "smooth" });
-  }, { passive: false });
+      // Smooth scroll with an extra offset for comfort
+      const HEADER_OFFSET = 80;
+      const y = sec.getBoundingClientRect().top + window.scrollY - HEADER_OFFSET;
+      window.scrollTo({ top: y, behavior: "smooth" });
+    }, { passive: false });
 
-  toc.dataset.handlers = "1";
-}
+    toc.dataset.handlers = "1";
+  }
 
   // Scrollspy once per container
   if (!container.dataset.spy) {
