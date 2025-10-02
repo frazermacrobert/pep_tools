@@ -52,35 +52,53 @@
     <div id="roleProfile" class="card"></div>
   </section>
 
-  <section id="pep" class="section">
+ <section id="pep" class="section">
+  <div class="toolbar">
+    <button class="btn ghost" data-nav="home">← Back to home</button>
+    <button class="btn" data-nav="evaluate">Skip to Evaluate →</button>
+  </div>
+
+  <div class="card">
+    <h2>PEP FFF Prep</h2>
+
+    <p class="kpi" style="margin-bottom:6px;">
+      Our aim is to provide Career Pathways / Personal Development Plans for all of our SA employees,
+      based on your individual goals and aspirations.
+    </p>
+    <p class="kpi" style="margin-top:0;">
+      The purpose of the FFF chat is to create alignment between expectations, priorities, and a plan for the future,
+      and to set you up for success next year (and beyond).
+      <br><br><strong>Please complete the questions below in preparation for your FFF Chat.</strong>
+    </p>
+
+    <div class="input-row">
+      <div>
+        <label for="pepDate">Date</label>
+        <input id="pepDate" type="date">
+      </div>
+      <div>
+        <label for="pepName">Your name</label>
+        <input id="pepName" type="text" placeholder="e.g., Alex Smith">
+      </div>
+      <div>
+        <label for="pepManager">Line manager</label>
+        <input id="pepManager" type="text" placeholder="e.g., Jamie Lee">
+      </div>
+    </div>
+
+    <!-- Questions render here -->
+    <div id="pepQuestions" style="margin-top:8px;"></div>
+
     <div class="toolbar">
-      <button class="btn ghost" data-nav="home">← Back to home</button>
-      <button class="btn" data-nav="evaluate">Skip to Evaluate →</button>
+      <button class="btn" id="pepReset">Reset</button>
+      <button class="btn primary" id="pepDownload">Download as PDF</button>
     </div>
-    <div class="card">
-      <h2>PEP FFF Prep</h2>
-      <div class="input-row">
-        <div>
-          <label for="pepDate">Date</label>
-          <input id="pepDate" type="date">
-        </div>
-        <div>
-          <label for="pepName">Your name</label>
-          <input id="pepName" type="text" placeholder="e.g., Alex Smith">
-        </div>
-        <div>
-          <label for="pepManager">Line manager</label>
-          <input id="pepManager" type="text" placeholder="e.g., Jamie Lee">
-        </div>
-      </div>
-      <div id="pepQuestions" style="margin-top:8px;"></div>
-      <div class="toolbar">
-        <button class="btn" id="pepReset">Reset</button>
-        <button class="btn primary" id="pepDownload">Download as PDF</button>
-      </div>
-      <footer class="note">Tip: Save a copy of your PDF to your team’s PEP channel in Microsoft Teams and keep it handy for your FFF conversation.</footer>
-    </div>
-  </section>
+
+    <footer class="note">
+      Tip: Save a copy of your PDF to your team’s PEP channel in Microsoft Teams and keep it handy for your FFF conversation.
+    </footer>
+  </div>
+</section>
 
   <section id="evaluate" class="section">
     <div class="toolbar">
