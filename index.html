@@ -1,1 +1,125 @@
-<!doctype html><html><head><meta charset='utf-8'><title>Test</title></head><body>Hello world</body></html>
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>scarlettabbott • Performance & Growth Toolkit</title>
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<header class="header">
+  <div class="header-inner">
+    <img src="assets/logo.svg" alt="scarlettabbott" width="120" height="32">
+    <div class="spacer"></div>
+    <nav class="nav">
+      <button class="btn ghost" data-nav="home">Home</button>
+      <button class="btn ghost" data-nav="role">Role profile</button>
+      <button class="btn ghost" data-nav="pep">PEP FFF Prep</button>
+      <button class="btn ghost" data-nav="evaluate">Evaluate progress</button>
+      <button class="btn" id="toggleTheme" title="Toggle dark mode">🌓</button>
+    </nav>
+  </div>
+</header>
+
+<main class="container">
+  <section id="home" class="section active">
+    <h1>Performance & Growth Toolkit</h1>
+    <p class="kpi">Three simple steps to prepare, reflect and plan: review your role profile, prep for your Feedback • Focus • Future chat, and evaluate progress.</p>
+    <div class="grid" style="margin-top:14px;">
+      <div class="card">
+        <h3>1) Review role profile</h3>
+        <p class="kpi">Explore your competency framework in bite-sized, expandable sections.</p>
+        <div class="toolbar"><button class="btn primary" data-nav="role">Open role profile</button></div>
+      </div>
+      <div class="card">
+        <h3>2) PEP FFF Prep</h3>
+        <p class="kpi">Fill in a clean, guided form and save it as a PDF to bring to your conversation.</p>
+        <div class="toolbar"><button class="btn primary" data-nav="pep">Start my prep</button></div>
+      </div>
+      <div class="card">
+        <h3>3) Evaluate progress</h3>
+        <p class="kpi">Score competencies with sliders and visualise the result with a radar chart.</p>
+        <div class="toolbar"><button class="btn primary" data-nav="evaluate">Evaluate now</button></div>
+      </div>
+    </div>
+  </section>
+
+  <section id="role" class="section">
+    <div class="toolbar">
+      <button class="btn ghost" data-nav="home">← Back to home</button>
+      <button class="btn" data-nav="pep">Go to PEP FFF Prep →</button>
+    </div>
+    <div id="roleProfile" class="card"></div>
+  </section>
+
+  <section id="pep" class="section">
+    <div class="toolbar">
+      <button class="btn ghost" data-nav="home">← Back to home</button>
+      <button class="btn" data-nav="evaluate">Skip to Evaluate →</button>
+    </div>
+    <div class="card">
+      <h2>PEP FFF Prep</h2>
+      <div class="input-row">
+        <div>
+          <label for="pepDate">Date</label>
+          <input id="pepDate" type="date">
+        </div>
+        <div>
+          <label for="pepName">Your name</label>
+          <input id="pepName" type="text" placeholder="e.g., Alex Smith">
+        </div>
+        <div>
+          <label for="pepManager">Line manager</label>
+          <input id="pepManager" type="text" placeholder="e.g., Jamie Lee">
+        </div>
+      </div>
+      <div id="pepQuestions" style="margin-top:8px;"></div>
+      <div class="toolbar">
+        <button class="btn" id="pepReset">Reset</button>
+        <button class="btn primary" id="pepDownload">Download as PDF</button>
+      </div>
+      <footer class="note">Tip: Save a copy of your PDF to your team’s PEP channel in Microsoft Teams and keep it handy for your FFF conversation.</footer>
+    </div>
+  </section>
+
+  <section id="evaluate" class="section">
+    <div class="toolbar">
+      <button class="btn ghost" data-nav="home">← Back to home</button>
+      <span class="badge small">Scoring: 1–5 (see rubric)</span>
+    </div>
+
+    <div class="eval-layout">
+      <div class="card">
+        <h2>Self / Manager scoring</h2>
+        <div id="sliders"></div>
+        <div class="toolbar">
+          <button class="btn" id="resetScores">Reset all</button>
+          <button class="btn" id="exportSelf">Export my scores (JSON)</button>
+          <label class="btn" for="importPeer" title="Import JSON with peer/manager scores">Import peer scores</label>
+          <input id="importPeer" type="file" accept="application/json" class="hidden">
+        </div>
+      </div>
+
+      <div>
+        <div class="card">
+          <h3>Radar chart</h3>
+          <div class="canvas-wrap">
+            <canvas id="radar" width="560" height="560"></canvas>
+          </div>
+          <div class="toolbar">
+            <button class="btn" id="downloadPNG">Download chart (PNG)</button>
+            <button class="btn primary" id="printSummary">Print / Save PDF</button>
+          </div>
+        </div>
+        <div class="card">
+          <h3>Suggested scoring system</h3>
+          <div id="scoringRubric"></div>
+        </div>
+      </div>
+    </div>
+  </section>
+</main>
+
+<script src="app.js"></script>
+</body>
+</html>
