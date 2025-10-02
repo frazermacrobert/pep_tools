@@ -198,3 +198,6 @@ details .inner{
 }
 #role .table tbody tr:nth-child(odd){ background: color-mix(in oklab, var(--beige) 30%, transparent); }
 #role .table th, #role .table td{ padding:10px 10px; }
+
+/* Ensure scrolling to a section stops below the sticky header */
+#role details { scroll-margin-top: 88px; }
