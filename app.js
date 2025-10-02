@@ -57,9 +57,9 @@ async function fetchJson(url){
 }
 
 /* ----------------------- ROLE PROFILE ------------------------------------ */
-/* ----------------------- ROLE PROFILE (idempotent) ----------------------- */
+/* ----------------------- ROLE PROFILE (stable, single-run) ---------------- */
 
-// Fallback role content if /data/competencies.html is missing
+// 1) Fallback role content (used only if /data/competencies.html not found)
 const ROLE_FALLBACK_HTML = `
 <section>
   <details open>
@@ -174,46 +174,54 @@ const ROLE_FALLBACK_HTML = `
 </section>
 `;
 
-/** enhanceRoleProfile makes decoration ONCE, preserving original titles */
+// 2) simple inline SVG set (no emoji flicker)
+const ROLE_ICONS = [
+  '<svg width="16" height="16" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2"/><line x1="12" y1="7" x2="12" y2="13" stroke="currentColor" stroke-width="2"/><circle cx="12" cy="17" r="1.5" fill="currentColor"/></svg>',
+  '<svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M3 12h18M12 3v18" stroke="currentColor" stroke-width="2" opacity=".25"/><path d="M4 12a8 8 0 0 1 16 0" stroke="currentColor" stroke-width="2"/></svg>',
+  '<svg width="16" height="16" viewBox="0 0 24 24" fill="none"><rect x="3" y="3" width="8" height="8" rx="2" stroke="currentColor" stroke-width="2"/><rect x="13" y="13" width="8" height="8" rx="2" stroke="currentColor" stroke-width="2"/></svg>',
+  '<svg width="16" height="16" viewBox="0 0 24 24" fill="none"><rect x="3" y="7" width="18" height="10" rx="2" stroke="currentColor" stroke-width="2"/><path d="M7 7v10M17 7v10" stroke="currentColor" stroke-width="2" opacity=".3"/></svg>',
+  '<svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M12 3l3.09 6.26L22 10l-5 4.87L18.18 21 12 17.77 5.82 21 7 14.87 2 10l6.91-.74L12 3z" stroke="currentColor" stroke-width="2" fill="none"/></svg>',
+  '<svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M3 17l6-6 4 4 7-7" stroke="currentColor" stroke-width="2"/><path d="M3 21h18" stroke="currentColor" stroke-width="2" opacity=".3"/></svg>',
+  '<svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M7 21V8l5-5 5 5v13" stroke="currentColor" stroke-width="2"/><path d="M7 13h10" stroke="currentColor" stroke-width="2" opacity=".3"/></svg>'
+];
+
+// 3) Decorate details ONCE, based on preserved original titles
 function enhanceRoleProfile(container){
-  // Skip if this container already enhanced
-  if (container.dataset.enhanced === "1") return;
+  if (container.dataset.enhanced === "1") return; // whole container already done
 
-  const icons = ["ℹ️","🧭","🧩","🧱","🌟","📈","🪜"];
   const titles = [];
-
   container.querySelectorAll("details").forEach((d, idx) => {
-    // Skip this details if already enhanced
-    if (d.dataset.enhanced === "1") return;
+    if (d.dataset.enhanced === "1") return; // this block already done
 
     const summary = d.querySelector("summary");
     if(!summary) return;
 
-    // Preserve original title once in data-title
-    const originalTitle = d.dataset.title || summary.textContent.trim();
-    d.dataset.title = originalTitle;
-    titles.push(originalTitle);
+    // Preserve original title (first run only)
+    const original = d.dataset.title || summary.textContent.trim();
+    d.dataset.title = original;
+    titles.push(original);
 
-    // Assign a stable id for TOC
-    const id = "sec-" + originalTitle.toLowerCase().replace(/[^a-z0-9]+/g,"-");
+    const id = "sec-" + original.toLowerCase().replace(/[^a-z0-9]+/g,"-");
     d.id = id;
 
-    // Build decorated summary content
-    const tag = (idx===0 ? "Overview" :
-                /core competencies/i.test(originalTitle) ? "Core" :
-                /professional/i.test(originalTitle) ? "Professional" :
-                /kpi/i.test(originalTitle) ? "KPIs" :
-                /progression/i.test(originalTitle) ? "Pathway" : "Section");
-    const icon = icons[idx % icons.length];
+    const tag =
+      idx===0 ? "Overview" :
+      /core competencies/i.test(original) ? "Core" :
+      /professional/i.test(original) ? "Professional" :
+      /kpi/i.test(original) ? "KPIs" :
+      /progression/i.test(original) ? "Pathway" : "Section";
 
+    const iconSvg = ROLE_ICONS[idx % ROLE_ICONS.length];
+
+    // Write a fresh, clean summary using the preserved title
     summary.innerHTML = `
-      <span>${icon}</span>
-      <span>${originalTitle}</span>
+      <span class="icon" aria-hidden="true">${iconSvg}</span>
+      <span class="title">${original}</span>
       <span class="tag">${tag}</span>
       <span class="chev">›</span>
     `;
 
-    // Wrap non-summary nodes in .inner (only once)
+    // Wrap body content once
     if (!d.querySelector(".inner")) {
       const rest = Array.from(d.childNodes).filter(n => n.nodeName.toLowerCase() !== "summary");
       const wrap = document.createElement("div");
@@ -225,7 +233,7 @@ function enhanceRoleProfile(container){
     d.dataset.enhanced = "1";
   });
 
-  // Build the TOC once
+  // Build TOC exactly once
   const toc = document.getElementById("tocLinks");
   if (toc && !toc.dataset.enhanced) {
     toc.innerHTML = titles.map(t => {
@@ -235,13 +243,12 @@ function enhanceRoleProfile(container){
     toc.dataset.enhanced = "1";
   }
 
-  // Scrollspy (create once)
+  // Scrollspy once per container
   if (!container.dataset.spy) {
     const tocLinks = toc ? toc.querySelectorAll("a") : [];
     const observer = new IntersectionObserver((entries) => {
       entries.forEach(entry => {
-        const id = entry.target.id;
-        const link = Array.from(tocLinks).find(a => a.getAttribute("href") === `#${id}`);
+        const link = Array.from(tocLinks).find(a => a.getAttribute("href") === `#${entry.target.id}`);
         if (link) link.classList.toggle("active", entry.isIntersecting && entry.intersectionRatio > 0.2);
       });
     }, { rootMargin: "-20% 0px -70% 0px", threshold: [0, 0.25, 1] });
@@ -250,7 +257,7 @@ function enhanceRoleProfile(container){
     container.dataset.spy = "1";
   }
 
-  // Expand/Collapse handlers (bind once)
+  // Expand/Collapse handlers once
   if (!container.dataset.bound) {
     const expandAll = document.getElementById("expandAll");
     const collapseAll = document.getElementById("collapseAll");
@@ -262,20 +269,21 @@ function enhanceRoleProfile(container){
   container.dataset.enhanced = "1";
 }
 
+// 4) Load once, decorate once
 async function onRoleReady(){
   const target = document.getElementById("roleProfile");
   if (!target) return;
 
-  // Inject source HTML exactly once
   if (!target.dataset.loaded) {
-    const html = await fetch("data/competencies.html", {cache:"no-cache"})
-      .then(r => r.ok ? r.text() : null)
-      .catch(() => null);
-    target.innerHTML = html || ROLE_FALLBACK_HTML;
+    try {
+      const r = await fetch("data/competencies.html", {cache:"no-cache"});
+      target.innerHTML = r.ok ? await r.text() : ROLE_FALLBACK_HTML;
+    } catch {
+      target.innerHTML = ROLE_FALLBACK_HTML;
+    }
     target.dataset.loaded = "1";
   }
 
-  // Decorate once (safe to call multiple times)
   enhanceRoleProfile(target);
 }
 
@@ -588,7 +596,6 @@ async function initEvaluate(){
 }
 
 document.addEventListener("DOMContentLoaded", () => {
-  onRoleReady();
   renderPep();
   initEvaluate();
 });
