@@ -30,58 +30,86 @@ fetch("data/competencies.html").then(r=>r.text()).then(html => {
   document.getElementById("roleProfile").innerHTML = html;
 });
 
-// PEP questions
+// --- PEP FFF PREP -----------------------------------------------------------
+const PEP_QUESTIONS = [
+  "Looking back, what skills or strengths have you developed most this year, and how have they helped you in your role?",
+  "What feedback have you received this year that you’ve acted on, and what impact did it have?",
+  "Consider your Competency Framework: what are you currently achieving?",
+  "What 2-3 things you want to challenge yourself on next year, and how would this help your growth and the teams’ success?",
+  "Where do you see yourself adding the most value in the next 12 months?",
+  "What do you want to learn, try, or achieve next year that will support your growth?",
+  "How have you brought our values of United, Brilliant, and Unstoppable to life in your role this year?",
+  "What could you do differently next year to live our values even more fully?"
+];
+
 const pepQuestionsEl = document.getElementById("pepQuestions");
-fetch("data/pep_questions.json").then(r=>r.json()).then(questions => {
-  questions.forEach((q, i) => {
+
+// Render question set (label + textarea per question)
+function renderPepQuestions() {
+  if (!pepQuestionsEl) return;
+  pepQuestionsEl.innerHTML = "";
+  PEP_QUESTIONS.forEach((q, i) => {
     const wrap = document.createElement("div");
     wrap.innerHTML = `
-      <label for="q_${i}">${q}</label>
-      <textarea id="q_${i}" placeholder="Type your reflection..."></textarea>
+      <label for="pep_q_${i}">${q}</label>
+      <textarea id="pep_q_${i}" placeholder="Type your reflection..."></textarea>
     `;
     pepQuestionsEl.appendChild(wrap);
   });
-});
+}
+renderPepQuestions();
 
-// Reset and Print to PDF for PEP
-document.getElementById("pepReset").addEventListener("click", () => {
-  document.getElementById("pepDate").value = "";
-  document.getElementById("pepName").value = "";
-  document.getElementById("pepManager").value = "";
-  pepQuestionsEl.querySelectorAll("textarea").forEach(t => t.value = "");
-});
-document.getElementById("pepDownload").addEventListener("click", () => {
-  const date = document.getElementById("pepDate").value;
-  const name = document.getElementById("pepName").value;
-  const manager = document.getElementById("pepManager").value;
-  const answers = [...pepQuestionsEl.querySelectorAll("textarea")].map(t => t.value);
+// Reset the whole form (meta + answers)
+const pepResetBtn = document.getElementById("pepReset");
+if (pepResetBtn) {
+  pepResetBtn.addEventListener("click", () => {
+    const ids = ["pepDate", "pepName", "pepManager"];
+    ids.forEach(id => { const el = document.getElementById(id); if (el) el.value = ""; });
+    pepQuestionsEl.querySelectorAll("textarea").forEach(t => t.value = "");
+  });
+}
 
-  const printable = window.open("", "_blank");
-  printable.document.write(`<!doctype html><html><head>
-    <meta charset="utf-8"><title>PEP FFF Prep</title>
-    <style>
-      body{ font-family: Arial, sans-serif; padding:20px; }
-      h1{ margin:0 0 10px; }
-      .meta{ margin-bottom:12px; }
-      .qa{ margin:12px 0; page-break-inside:avoid; }
-      .qa h3{ font-size:14px; margin:0 0 6px; }
-      .qa p{ white-space:pre-wrap; border:1px solid #ddd; padding:10px; border-radius:8px; }
-      @media print{ .no-print{ display:none } }
-    </style>
-  </head><body>
-    <h1>PEP FFF Prep</h1>
-    <div class="meta"><strong>Date:</strong> ${date || ""} &nbsp;&nbsp; <strong>Name:</strong> ${name || ""} &nbsp;&nbsp; <strong>Line manager:</strong> ${manager || ""}</div>
-    ${[...pepQuestionsEl.querySelectorAll("label")].map((lab, idx) => `
-      <div class="qa">
-        <h3>${lab.textContent}</h3>
-        <p>${answers[idx] ? answers[idx].replace(/</g,"&lt;") : ""}</p>
-      </div>
-    `).join("")}
-    <p class="no-print"><em>Tip: Save this as PDF and upload to your team’s PEP channel in Microsoft Teams.</em></p>
-    <script>window.onload = () => window.print();<\/script>
-  </body></html>`);
-  printable.document.close();
-});
+// Download/print as PDF (opens a print-friendly window)
+const pepDownloadBtn = document.getElementById("pepDownload");
+if (pepDownloadBtn) {
+  pepDownloadBtn.addEventListener("click", () => {
+    const date = (document.getElementById("pepDate") || {}).value || "";
+    const name = (document.getElementById("pepName") || {}).value || "";
+    const manager = (document.getElementById("pepManager") || {}).value || "";
+
+    const answers = PEP_QUESTIONS.map((_, i) => {
+      const el = document.getElementById(`pep_q_${i}`);
+      return el ? el.value : "";
+    });
+
+    const printable = window.open("", "_blank");
+    printable.document.write(`<!doctype html><html><head>
+      <meta charset="utf-8"><title>PEP FFF Prep</title>
+      <style>
+        body{ font-family: Arial, sans-serif; padding:20px; }
+        h1{ margin:0 0 10px; }
+        .meta{ margin-bottom:12px; }
+        .qa{ margin:12px 0; page-break-inside:avoid; }
+        .qa h3{ font-size:14px; margin:0 0 6px; }
+        .qa p{ white-space:pre-wrap; border:1px solid #ddd; padding:10px; border-radius:8px; }
+        @media print{ .no-print{ display:none } }
+      </style>
+    </head><body>
+      <h1>PEP FFF Prep</h1>
+      <div class="meta"><strong>Date:</strong> ${date} &nbsp;&nbsp; <strong>Name:</strong> ${name} &nbsp;&nbsp; <strong>Line manager:</strong> ${manager}</div>
+      ${PEP_QUESTIONS.map((q, idx) => `
+        <div class="qa">
+          <h3>${q}</h3>
+          <p>${(answers[idx] || "").replace(/</g,"&lt;")}</p>
+        </div>
+      `).join("")}
+      <p class="no-print"><em>Tip: Save this as PDF and upload to your team’s PEP channel in Microsoft Teams.</em></p>
+      <script>window.onload = () => window.print();<\/script>
+    </body></html>`);
+    printable.document.close();
+  });
+}
+
 
 // Evaluate progress
 let competencies = [];
