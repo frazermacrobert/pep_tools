@@ -2,8 +2,32 @@
    scarlettabbott • Performance & Growth Toolkit
    Complete styles.css (with Role profile polish)
    ========================================================================== */
+@property --grad-pos-1-x {
+  syntax: '<percentage>';
+  inherits: false;
+  initial-value: 80%;
+}
+@property --grad-pos-1-y {
+  syntax: '<percentage>';
+  inherits: false;
+  initial-value: 20%;
+}
+@property --grad-pos-2-x {
+  syntax: '<percentage>';
+  inherits: false;
+  initial-value: 20%;
+}
+@property --grad-pos-2-y {
+  syntax: '<percentage>';
+  inherits: false;
+  initial-value: 80%;
+}
 
 :root{
+  --grad-pos-1-x: 80%;
+  --grad-pos-1-y: 20%;
+  --grad-pos-2-x: 20%;
+  --grad-pos-2-y: 80%;
   --beige:#f5f1eb;
   --ink:#141414;
   --muted:#666;
@@ -20,10 +44,32 @@ html,body{
   margin:0; padding:0;
   font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Inter, Arial;
   color:var(--ink);
-  background:var(--beige);
+  background-color: var(--beige);
 }
 
+.background-gradient {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: -1;
+  background-image:
+    radial-gradient(at var(--grad-pos-1-x) var(--grad-pos-1-y), #fbe9ef, transparent 40%),
+    radial-gradient(at var(--grad-pos-2-x) var(--grad-pos-2-y), #fff3e0, transparent 40%);
+  transition:
+    --grad-pos-1-x 0.8s ease-out,
+    --grad-pos-1-y 0.8s ease-out,
+    --grad-pos-2-x 0.8s ease-out,
+    --grad-pos-2-y 0.8s ease-out;
+}
+
+
 /* Dark mode */
+body.dark .background-gradient {
+  display: none;
+}
+
 body.dark{
   --beige:#111;
   --ink:#f6f6f6;
