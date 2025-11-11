@@ -7,6 +7,7 @@
 <link rel="stylesheet" href="styles.css">
 </head>
 <body>
+  <div class="background-gradient"></div>
   <!-- Header / Nav -->
   <header class="header">
     <div class="header-inner">
@@ -202,5 +203,18 @@
 
   <!-- App logic (role/pep/evaluate) -->
   <script src="app.js"></script>
+
+  <script>
+    document.addEventListener('mousemove', e => {
+      const { clientX: x, clientY: y } = e;
+      const { innerWidth: width, innerHeight: height } = window;
+      const xPercent = x / width;
+      const yPercent = y / height;
+      document.documentElement.style.setProperty('--grad-pos-1-x', `${20 + xPercent * 60}%`);
+      document.documentElement.style.setProperty('--grad-pos-1-y', `${10 + yPercent * 30}%`);
+      document.documentElement.style.setProperty('--grad-pos-2-x', `${80 - xPercent * 60}%`);
+      document.documentElement.style.setProperty('--grad-pos-2-y', `${90 - yPercent * 30}%`);
+    });
+  </script>
 </body>
 </html>
