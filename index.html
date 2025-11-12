@@ -28,22 +28,33 @@
     <!-- HOME -->
     <section id="home" class="section active">
       <h1>Performance & Growth Toolkit</h1>
-      <p class="kpi">Three simple steps to prepare, reflect and plan: review your role profile, prep for your Feedback • Focus • Future chat, and evaluate progress.</p>
+      <p class="kpi">Choose your role and explore three focused tools to help you prepare, reflect and grow.</p>
+
+      <div class="role-selector-container">
+        <label for="roleSelector">Your role</label>
+        <select id="roleSelector">
+          <option value="default" disabled selected>Select your role</option>
+          <option value="associate-consultant">Associate Consultant</option>
+          <option value="consultant">Consultant</option>
+          <option value="senior-consultant">Senior Consultant</option>
+        </select>
+      </div>
+
       <div class="grid" style="margin-top:14px;">
         <div class="card">
           <h3>1) Review role profile</h3>
-          <p class="kpi">Explore your competency framework in bite-sized, expandable sections.</p>
-          <div class="toolbar"><button class="btn primary" data-nav="role">Open role profile</button></div>
+          <p class="kpi">Understand your core competencies and expectations.</p>
+          <div class="toolbar"><a href="#role" data-role-link class="btn primary">Open role profile</a></div>
         </div>
         <div class="card">
           <h3>2) PEP FFF Prep</h3>
-          <p class="kpi">Fill in a clean, guided form and save it as a PDF to bring to your conversation.</p>
-          <div class="toolbar"><button class="btn primary" data-nav="pep">Start my prep</button></div>
+          <p class="kpi">Prepare for your Feedback · Focus · Future conversation.</p>
+          <div class="toolbar"><a href="#pep" data-role-link class="btn primary">Start prep</a></div>
         </div>
         <div class="card">
           <h3>3) Evaluate progress</h3>
-          <p class="kpi">Score competencies with sliders and visualise the result with a radar chart.</p>
-          <div class="toolbar"><button class="btn primary" data-nav="evaluate">Evaluate now</button></div>
+          <p class="kpi">Assess development areas and record reflections.</p>
+          <div class="toolbar"><a href="#evaluate" data-role-link class="btn primary">Evaluate now</a></div>
         </div>
       </div>
     </section>
@@ -205,6 +216,19 @@
   <script src="app.js"></script>
 
   <script>
+    // Role selector logic
+    const roleSelector = document.getElementById('roleSelector');
+    const roleLinks = document.querySelectorAll('[data-role-link]');
+
+    roleSelector.addEventListener('change', () => {
+      const selectedRole = roleSelector.value;
+      roleLinks.forEach(link => {
+        const originalHref = link.getAttribute('href');
+        const newHref = `${originalHref.split('?')[0]}?role=${selectedRole}`;
+        link.setAttribute('href', newHref);
+      });
+    });
+
     document.addEventListener('mousemove', e => {
       const { clientX: x, clientY: y } = e;
       const { innerWidth: width, innerHeight: height } = window;

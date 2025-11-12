@@ -28,14 +28,14 @@
   --grad-pos-1-y: 20%;
   --grad-pos-2-x: 20%;
   --grad-pos-2-y: 80%;
-  --beige:#f5f1eb;
+  --beige:#f3efe7;
   --ink:#141414;
   --muted:#666;
   --card:#ffffff;
-  --accent:#e01f2d;
-  --ring:0 0 0 3px rgba(224,31,45,0.15);
+  --accent:#e53939;
+  --ring:0 0 0 3px rgba(229,57,57,0.15);
   --shadow: 0 8px 24px rgba(20,20,20,0.06), 0 2px 6px rgba(20,20,20,0.04);
-  --grad: linear-gradient(135deg, rgba(224,31,45,0.08), rgba(224,31,45,0.02));
+  --grad: linear-gradient(135deg, rgba(229,57,57,0.08), rgba(229,57,57,0.02));
 }
 
 *{ box-sizing:border-box }
@@ -95,12 +95,14 @@ body.dark{
   appearance:none; border:1px solid color-mix(in oklab, var(--ink) 12%, transparent);
   background:var(--card); color:var(--ink); padding:10px 14px; border-radius:12px; cursor:pointer;
   box-shadow:var(--shadow);
+  text-decoration: none;
 }
 .btn.primary{ background:var(--accent); color:#fff; border-color:transparent; }
 .btn.ghost{ background:transparent; border-color: color-mix(in oklab, var(--ink) 12%, transparent); }
 .btn:focus{ outline:none; box-shadow: var(--ring); }
 
-.grid{ display:grid; grid-template-columns: repeat(auto-fit,minmax(260px,1fr)); gap:16px; }
+.grid{ display:grid; grid-template-columns: repeat(3, 1fr); gap:16px; }
+@media (max-width: 720px){ .grid{ grid-template-columns: 1fr; } }
 .card{
   background:var(--card); border-radius:16px; padding:18px; box-shadow:var(--shadow);
   border:1px solid color-mix(in oklab, var(--ink) 10%, transparent);
@@ -130,6 +132,10 @@ h2{ font-size:22px; margin:18px 0 10px; }
 .table thead th{ border-top:none; text-align:left; font-size:13px; color:var(--muted); }
 .two-col{ columns:2; gap:20px; }
 @media (max-width: 720px){ .two-col{ columns:1 } }
+
+.role-selector-container {
+  margin-top: 24px;
+}
 
 /* Forms */
 label{ display:block; font-weight:600; margin:10px 0 6px; }
