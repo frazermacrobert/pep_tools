@@ -347,6 +347,10 @@ function enhanceRoleProfile(container){
 async function onRoleReady(){
   const target = document.getElementById("roleProfile");
   if (!target) return;
+
+  // Signal that loading is in progress
+  target.dataset.loading = "true";
+
   const role = getRole();
   const currentRole = target.dataset.role;
 
@@ -378,6 +382,9 @@ async function onRoleReady(){
   }
 
   enhanceRoleProfile(target);
+
+  // Signal that loading is complete
+  target.dataset.loading = "done";
 }
 
 

@@ -229,11 +229,8 @@
         if (document.getElementById('evaluate').classList.contains('active')) {
             window.loadEvaluateData();
         }
-        // Update links on the homepage that point to role-specific content
-        roleLinks.forEach(link => {
-            const originalHref = link.getAttribute('href').split('?')[0];
-            link.setAttribute('href', `${originalHref}?role=${selectedRole}`);
-        });
+        // Role-specific links are no longer needed here,
+        // as the role is saved in localStorage and read by the target pages.
     }
 
     // Load role from localStorage on page load and set dropdown
