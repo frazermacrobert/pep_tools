@@ -34,9 +34,10 @@
         <label for="roleSelector">Your role</label>
         <select id="roleSelector">
           <option value="default" disabled selected>Select your role</option>
-          <option value="associate-consultant">Associate Consultant (In DEV) </option>
-          <option value="consultant">Consultant (In DEV)</option>
-          <option value="senior-consultant">Senior Consultant (In DEV)</option>
+          <option value="project-manager">Project Manager</option>
+          <option value="consultant">Consultant</option>
+          <option value="senior-designer">Senior Designer</option>
+          <option value="other">Other</option>
         </select>
       </div>
 
@@ -220,13 +221,33 @@
     const roleSelector = document.getElementById('roleSelector');
     const roleLinks = document.querySelectorAll('[data-role-link]');
 
+    // NEW: Function to update role and trigger content loading
+    function updateRole(selectedRole) {
+        // Save the selected role to localStorage
+        localStorage.setItem("sa-role", selectedRole);
+        // If the evaluate section is active, reload its data
+        if (document.getElementById('evaluate').classList.contains('active')) {
+            window.loadEvaluateData();
+        }
+        // Update links on the homepage that point to role-specific content
+        roleLinks.forEach(link => {
+            const originalHref = link.getAttribute('href').split('?')[0];
+            link.setAttribute('href', `${originalHref}?role=${selectedRole}`);
+        });
+    }
+
+    // Load role from localStorage on page load and set dropdown
+    const savedRole = localStorage.getItem("sa-role") || "project-manager";
+    roleSelector.value = savedRole;
+    updateRole(savedRole); // Apply the role on load
+
+    // Add event listener for dropdown changes
     roleSelector.addEventListener('change', () => {
-      const selectedRole = roleSelector.value;
-      roleLinks.forEach(link => {
-        const originalHref = link.getAttribute('href');
-        const newHref = `${originalHref.split('?')[0]}?role=${selectedRole}`;
-        link.setAttribute('href', newHref);
-      });
+        updateRole(roleSelector.value);
+        // Also reload the role profile if it's currently visible
+        if (document.getElementById('role').classList.contains('active')) {
+            onRoleReady();
+        }
     });
 
     document.addEventListener('mousemove', e => {

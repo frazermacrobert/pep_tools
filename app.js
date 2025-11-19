@@ -96,6 +96,15 @@ async function fetchJson(url){
   }catch(e){ return null; }
 }
 
+function getRole() {
+    const role = localStorage.getItem("sa-role");
+    const validRoles = ["project-manager", "consultant", "senior-designer"];
+    if (validRoles.includes(role)) {
+        return role;
+    }
+    return "project-manager"; // Default for 'other', null, etc.
+}
+
 /* ----------------------- ROLE PROFILE (stable, single-run) ---------------- */
 
 // 1) Fallback role content (used only if /data/competencies.html not found)
@@ -338,10 +347,29 @@ function enhanceRoleProfile(container){
 async function onRoleReady(){
   const target = document.getElementById("roleProfile");
   if (!target) return;
+  const role = getRole();
+  const currentRole = target.dataset.role;
+
+  // If role is different, reset content and loaded/enhanced flags
+  if (currentRole !== role) {
+      target.innerHTML = '';
+      target.dataset.loaded = '';
+      target.dataset.enhanced = '';
+      target.dataset.spy = ''; // also reset scrollspy
+      target.dataset.bound = ''; // and expand/collapse buttons
+      const toc = document.getElementById("tocLinks");
+      if (toc) {
+          toc.innerHTML = '';
+          toc.dataset.enhanced = '';
+          toc.dataset.handlers = '';
+      }
+  }
 
   if (!target.dataset.loaded) {
+    target.dataset.role = role; // Store the current role
     try {
-      const r = await fetch("data/competencies.html", {cache:"no-cache"});
+      const path = `data/${role}/competencies.html`;
+      const r = await fetch(path, {cache:"no-cache"});
       target.innerHTML = r.ok ? await r.text() : ROLE_FALLBACK_HTML;
     } catch {
       target.innerHTML = ROLE_FALLBACK_HTML;
@@ -459,6 +487,18 @@ let peerScores = null;
 const slidersEl = document.getElementById("sliders");
 const radarCanvas = document.getElementById("radar");
 const rubricWrap = document.getElementById("scoringRubric");
+
+async function loadEvaluateData() {
+    const role = getRole();
+    const path = `data/${role}/competencies.json`;
+    const items = await fetchJson(path);
+    competencies = Array.isArray(items) && items.length ? items : COMP_FALLBACK;
+    selfScores = new Array(competencies.length).fill(0);
+    peerScores = null; // Also reset peer scores.
+    renderSliders();
+    drawRadar();
+}
+window.loadEvaluateData = loadEvaluateData;
 
 function renderSliders(){
   if (!slidersEl) return;
@@ -640,11 +680,7 @@ function bindEvaluateActions(){
 }
 
 async function initEvaluate(){
-  const items = await fetchJson("data/competencies.json");
-  competencies = Array.isArray(items) && items.length ? items : COMP_FALLBACK;
-  selfScores = new Array(competencies.length).fill(0);
-  renderSliders();
-  drawRadar();
+  await loadEvaluateData();
 
   const rubric = await fetchJson("data/scoring.json");
   const list = Array.isArray(rubric) && rubric.length ? rubric : RUBRIC_FALLBACK;
