@@ -1,8 +1,10 @@
 [
-  {"theme":"Project Delivery","competency":"End-to-End Ownership","description":"Delivers projects from brief to completion with quality and clarity."},
-  {"theme":"Project Delivery","competency":"Time & Budget Management","description":"Scopes and tracks budgets, timelines, and hours accurately."},
-  {"theme":"Client Communication","competency":"Confidence & Clarity","description":"Provides reliable, professional updates; builds trust."},
-  {"theme":"Team Collaboration","competency":"Connector & Co-ordinator","description":"Coordinates internal teams and freelancers for smooth delivery."},
-  {"theme":"Quality Control","competency":"Attention to Detail","description":"Oversees QA so outputs meet standards."},
-  {"theme":"Tool Usage","competency":"Structured Delivery","description":"Uses PM tools and documentation to maintain rigour."}
+  {"theme":"Client Partnership","competency":"Relationship Building","description":"Builds and maintains trusted relationships with day-to-day client contacts, demonstrating professionalism and credibility."},
+  {"theme":"Employee Experience","competency":"EX Knowledge & Contribution","description":"Understands core EX principles and contributes relevant thinking to client solutions."},
+  {"theme":"Commercial Acumen","competency":"Scoping Support & Value Delivery","description":"Supports commercial scoping, tracks time effectively, and understands how work delivers value to clients and the agency."},
+  {"theme":"Agency Proposition","competency":"Understanding & Communication","description":"Understands the agency proposition and communicates it confidently with clients and colleagues."},
+  {"theme":"Project Alignment","competency":"Insight-to-Delivery Clarity","description":"Brings client context and insight into the delivery process, ensuring cohesion with PMs and DoCs."},
+  {"theme":"Client Delivery","competency":"Proactive Delivery Partner","description":"Takes ownership of small scopes or parts of larger projects and responds proactively to client needs."},
+  {"theme":"Leadership","competency":"Collaboration & Learning","description":"Contributes to collective success, brings curiosity, asks questions, and supports others."}
 ]
+
